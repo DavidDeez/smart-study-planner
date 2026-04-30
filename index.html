@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered study plan generator. Get a structured, personalized study session tailored to your subject, available time, and difficulty level." />
+  <title>StudyFlow – AI Study Plan Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated background -->
+  <div class="bg-mesh"></div>
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">StudyFlow</span>
+      </div>
+      <nav class="header-nav">
+        <span class="nav-badge">AI-Powered</span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-tag">
+        <span class="pulse-dot"></span>
+        Your personal academic coach
+      </div>
+      <h1 class="hero-title">
+        Generate Your Perfect
+        <span class="gradient-text">Study Plan</span>
+      </h1>
+      <p class="hero-subtitle">
+        Input your subject, available time, and difficulty level — get a structured,
+        evidence-based study session plan in seconds.
+      </p>
+    </div>
+  </section>
+
+  <!-- Main App -->
+  <main class="app-container">
+
+    <!-- Input Form Card -->
+    <section class="form-section" id="form-section">
+      <div class="card form-card">
+        <div class="card-header">
+          <div class="card-icon">📚</div>
+          <div>
+            <h2 class="card-title">Set Up Your Session</h2>
+            <p class="card-subtitle">Fill in the details below to generate your plan</p>
+          </div>
+        </div>
+
+        <form id="study-form" novalidate>
+          <!-- Subject -->
+          <div class="form-group" id="group-subject">
+            <label for="subject" class="form-label">
+              <span class="label-icon">🎓</span> Subject / Topic
+            </label>
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              class="form-input"
+              placeholder="e.g., Machine Learning, Organic Chemistry, IELTS Writing…"
+              autocomplete="off"
+              maxlength="120"
+            />
+            <span class="field-error" id="error-subject">Please enter a subject or topic.</span>
+          </div>
+
+          <!-- Time + Difficulty Row -->
+          <div class="form-row">
+            <!-- Available Time -->
+            <div class="form-group" id="group-time">
+              <label for="time" class="form-label">
+                <span class="label-icon">⏱️</span> Available Time
+              </label>
+              <div class="select-wrapper">
+                <select id="time" name="time" class="form-select">
+                  <option value="" disabled selected>Select duration…</option>
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">1.5 hours</option>
+                  <option value="120">2 hours</option>
+                  <option value="150">2.5 hours</option>
+                  <option value="180">3 hours</option>
+                  <option value="240">4 hours</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+              <span class="field-error" id="error-time">Please select your available time.</span>
+            </div>
+
+            <!-- Difficulty -->
+            <div class="form-group" id="group-difficulty">
+              <label class="form-label">
+                <span class="label-icon">📊</span> Difficulty Level
+              </label>
+              <div class="difficulty-pills" id="difficulty-group" role="group" aria-label="Difficulty Level">
+                <button type="button" class="pill" data-value="Beginner" id="pill-beginner">
+                  🌱 Beginner
+                </button>
+                <button type="button" class="pill" data-value="Intermediate" id="pill-intermediate">
+                  🔥 Intermediate
+                </button>
+                <button type="button" class="pill" data-value="Advanced" id="pill-advanced">
+                  🚀 Advanced
+                </button>
+              </div>
+              <input type="hidden" id="difficulty" name="difficulty" value="" />
+              <span class="field-error" id="error-difficulty">Please select a difficulty level.</span>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-generate" id="btn-generate">
+            <span class="btn-text">Generate Study Plan</span>
+            <span class="btn-icon">✨</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Output Section (hidden until generated) -->
+    <section class="output-section" id="output-section" aria-live="polite">
+
+      <!-- Loading State -->
+      <div class="loading-card" id="loading-card">
+        <div class="loader-ring"></div>
+        <p class="loading-text">Crafting your personalized study plan…</p>
+        <div class="loading-steps" id="loading-steps">
+          <span class="loading-step active" id="lstep-1">Analyzing topic</span>
+          <span class="loading-step" id="lstep-2">Structuring blocks</span>
+          <span class="loading-step" id="lstep-3">Adding study tips</span>
+          <span class="loading-step" id="lstep-4">Finalizing plan</span>
+        </div>
+      </div>
+
+      <!-- Result Content -->
+      <div id="result-content" class="hidden">
+
+        <!-- Result Header -->
+        <div class="result-header">
+          <div class="result-meta">
+            <span class="meta-chip" id="meta-subject-chip"></span>
+            <span class="meta-chip chip-time" id="meta-time-chip"></span>
+            <span class="meta-chip chip-difficulty" id="meta-difficulty-chip"></span>
+          </div>
+          <div class="result-actions">
+            <button class="action-btn" id="btn-print" title="Print plan" onclick="window.print()">
+              🖨️ Print
+            </button>
+            <button class="action-btn" id="btn-copy" title="Copy to clipboard">
+              📋 Copy
+            </button>
+            <button class="action-btn btn-reset" id="btn-reset">
+              🔄 New Plan
+            </button>
+          </div>
+        </div>
+
+        <!-- Study Plan Timeline -->
+        <div class="card result-card" id="card-plan">
+          <div class="card-header">
+            <div class="card-icon">📘</div>
+            <div>
+              <h2 class="card-title">Study Plan</h2>
+              <p class="card-subtitle" id="plan-summary-text"></p>
+            </div>
+          </div>
+          <div class="timeline" id="timeline-blocks"></div>
+        </div>
+
+        <!-- Two-Column: Focus + Tips -->
+        <div class="two-col">
+
+          <!-- Key Focus Areas -->
+          <div class="card result-card" id="card-focus">
+            <div class="card-header">
+              <div class="card-icon">🎯</div>
+              <div>
+                <h2 class="card-title">Key Focus Areas</h2>
+                <p class="card-subtitle">Concepts to prioritize</p>
+              </div>
+            </div>
+            <ul class="focus-list" id="focus-list"></ul>
+          </div>
+
+          <!-- Study Tips -->
+          <div class="card result-card" id="card-tips">
+            <div class="card-header">
+              <div class="card-icon">⚡</div>
+              <div>
+                <h2 class="card-title">Study Tips</h2>
+                <p class="card-subtitle">Personalized for your session</p>
+              </div>
+            </div>
+            <ul class="tips-list" id="tips-list"></ul>
+          </div>
+
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="card result-card" id="card-progress">
+          <div class="card-header">
+            <div class="card-icon">✅</div>
+            <div>
+              <h2 class="card-title">Session Progress</h2>
+              <p class="card-subtitle">Check off blocks as you complete them</p>
+            </div>
+          </div>
+          <div id="progress-tracker"></div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div>
+            </div>
+            <span class="progress-label" id="progress-label">0% Complete</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>StudyFlow &copy; 2026 &mdash; Designed for serious learners</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
